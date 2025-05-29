@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directory for uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IDE - WebStorm/IntelliJ
+.idea/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Debug
+.node-debug/
+
+# Temp directories
+.temp/
+.tmp/
+.cache/
+
+# Redis dump file
+dump.rdb
+
+# PM2 ecosystem file with sensitive data
+ecosystem.config.js
+
+# Local SSL certificates
+*.pem
+*.key
+*.crt 

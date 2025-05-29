@@ -40,10 +40,10 @@ interface ChatWindowProps {
 export default function ChatWindow({
   roomId,
   selectedRoomId,
-  onlineUsers,
-  typingUsers,
+  // onlineUsers,
+  // typingUsers,
   isGroup,
-  onTyping
+  // onTyping
 }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -654,7 +654,7 @@ export default function ChatWindow({
             <div className="text-gray-400">No messages yet. Start a conversation!</div>
           </div>
         ) : (
-          messages.map((message, index) => {
+          messages.map((message) => {
             const isLastReadMessage = findLastReadMessage()?._id === message._id;
             
             return (

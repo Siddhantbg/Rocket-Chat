@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api, { API_URL } from '../lib/axios';
+import api from '../lib/axios';
 
 interface User {
   id: string;
@@ -21,15 +21,6 @@ interface AuthState {
   initialize: () => Promise<void>;
   updateUser: (user: User) => void;
 }
-
-// Helper to decode JWT payload
-const decodeToken = (token: string): any => {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch {
-    return null;
-  }
-};
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,

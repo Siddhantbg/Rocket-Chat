@@ -6,4 +6,4 @@ interface User {
   code: string;
 }
 
-export default User; 
+export type { User }; 

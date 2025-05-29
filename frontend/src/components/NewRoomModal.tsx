@@ -20,7 +20,7 @@ export default function NewRoomModal({ isOpen, onClose, onRoomCreated }: NewRoom
     setIsLoading(true);
 
     try {
-      await api.post('/rooms', {
+      const response = await api.post('/rooms', {
         name: name.trim(),
         isGroup,
         members: memberCode ? memberCode.split(',').map(code => code.trim()) : []

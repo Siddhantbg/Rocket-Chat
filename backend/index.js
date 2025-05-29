@@ -14,14 +14,7 @@ const app = express();
 const httpServer = createServer(app);
 
 // Initialize Socket.IO
-const io = require('socket.io')(httpServer, {
-  cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-    credentials: true
-  },
-  transports: ['websocket', 'polling']
-});
+const io = initializeSocket(httpServer);
 
 // Store io instance in app for use in routes
 app.set('io', io);

@@ -10,7 +10,7 @@ const redis = new Redis({
 // Initialize rate limiter (test configuration)
 const ratelimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(10, '10s'), // Reduced to 3 messages per 10 seconds for testing
+  limiter: Ratelimit.slidingWindow(3, '10s'), // Reduced to 3 messages per 10 seconds for testing
   analytics: true,
 });
 

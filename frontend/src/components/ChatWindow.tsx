@@ -31,13 +31,19 @@ interface SocketResponse {
 interface ChatWindowProps {
   roomId: string;
   selectedRoomId: string;
+  onlineUsers: Set<string>;
+  typingUsers: Record<string, string[]>;
   isGroup: boolean;
+  onTyping: () => void;
 }
 
 export default function ChatWindow({
   roomId,
   selectedRoomId,
-  isGroup
+  onlineUsers,
+  typingUsers,
+  isGroup,
+  onTyping
 }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');

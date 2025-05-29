@@ -30,6 +30,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// Temporary data for demo purposes
+const DEMO_USER = {
+  id: '123',
+  name: 'Demo User'
+};
+
 function App() {
   const { user, initialize } = useAuthStore();
 

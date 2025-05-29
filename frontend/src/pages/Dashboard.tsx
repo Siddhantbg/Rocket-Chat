@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { usePresenceStore } from '../store/presenceStore';
 import { socketClient } from '../sockets/socket';
@@ -26,7 +26,7 @@ interface TypingUsers {
 
 export default function Dashboard() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const {
     onlineUsers,
     typingUsers: presenceTypingUsers,

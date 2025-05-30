@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { usePresenceStore } from '../store/presenceStore';
 import { socketClient } from '../sockets/socket';
@@ -31,7 +30,6 @@ export default function Dashboard() {
     removeOnlineUser,
     setTypingUsers: setPresenceTypingUsers
   } = usePresenceStore();
-  const navigate = useNavigate();
 
   // Handle room selection
   const handleRoomSelect = (room: Room) => {

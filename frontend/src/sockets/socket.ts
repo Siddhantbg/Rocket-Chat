@@ -67,9 +67,12 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
     timeout: 20000,
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'], // Try polling first, then upgrade to websocket
     path: '/socket.io/',
     forceNew: true,
+    extraHeaders: {
+      'Origin': window.location.origin
+    },
     auth: (cb) => {
       const { user, accessToken } = useAuthStore.getState();
       const authData = {
@@ -77,15 +80,20 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
         userId: user?.id,
       };
       
-      console.log('Socket auth data:', { 
+      console.log('Socket auth attempt:', { 
         hasUser: !!user, 
         hasToken: !!accessToken,
         socketUrl: import.meta.env.VITE_SOCKET_URL,
+        origin: window.location.origin,
         timestamp: new Date().toISOString()
       });
 
       if (!accessToken || !user?.id) {
-        console.error('Missing auth data:', { hasToken: !!accessToken, hasUser: !!user });
+        console.error('Missing auth data:', { 
+          hasToken: !!accessToken, 
+          hasUser: !!user,
+          origin: window.location.origin 
+        });
         socketClient.disconnect();
         return;
       }
@@ -95,6 +103,9 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
   }
 );
 
+let reconnectAttempts = 0;
+const MAX_FAST_RECONNECTS = 3;
+
 // Set up socket event listeners
 socketClient.on('connect', () => {
   const { user } = useAuthStore.getState();
@@ -103,9 +114,14 @@ socketClient.on('connect', () => {
     connected: socketClient.connected,
     userId: user?.id,
     url: import.meta.env.VITE_SOCKET_URL,
+    origin: window.location.origin,
     timestamp: new Date().toISOString(),
-    transport: socketClient.io.engine?.transport?.name
+    transport: socketClient.io.engine?.transport?.name,
+    attempts: reconnectAttempts
   });
+
+  // Reset reconnection attempts on successful connection
+  reconnectAttempts = 0;
 
   // Emit user:connect event after successful connection
   if (user?.id) {
@@ -122,10 +138,19 @@ socketClient.on('disconnect', (reason) => {
     reason,
     wasConnected: socketClient.connected,
     userId: user?.id,
-    attempts: (socketClient as any).io._reconnectionAttempts,
+    attempts: reconnectAttempts,
     timestamp: new Date().toISOString(),
-    transport: socketClient.io.engine?.transport?.name
+    transport: socketClient.io.engine?.transport?.name,
+    origin: window.location.origin
   });
+
+  // If we've tried reconnecting too many times quickly, slow down
+  if (reconnectAttempts >= MAX_FAST_RECONNECTS) {
+    socketClient.io.reconnectionDelay(5000); // Wait 5 seconds between attempts
+    socketClient.io.reconnectionDelayMax(10000); // Maximum 10 seconds between attempts
+  }
+
+  reconnectAttempts++;
 
   // If the disconnection was due to an auth error, don't reconnect
   if (reason === 'io server disconnect') {
@@ -142,8 +167,10 @@ socketClient.on('connect_error', (error) => {
     transport: socketClient.io.engine?.transport?.name,
     timestamp: new Date().toISOString(),
     url: import.meta.env.VITE_SOCKET_URL,
+    origin: window.location.origin,
     hasUser: !!user,
-    hasToken: !!accessToken
+    hasToken: !!accessToken,
+    attempts: reconnectAttempts
   });
 
   // If we get a 401 error, disconnect and don't retry

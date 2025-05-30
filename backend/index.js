@@ -29,13 +29,23 @@ app.set('io', io);
 const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
-    console.log('CORS request from origin:', origin);
-    console.log('Allowed origin:', allowedOrigin);
+    console.log('CORS request details:', {
+      requestOrigin: origin,
+      allowedOrigin,
+      time: new Date().toISOString(),
+      isAllowed: !origin || origin === allowedOrigin
+    });
     
+    // During development or for specific deployment scenarios,
+    // we might need to be more permissive
     if (!origin || origin === allowedOrigin) {
       callback(null, true);
     } else {
-      console.error('CORS blocked for origin:', origin);
+      console.error('CORS blocked:', {
+        requestOrigin: origin,
+        allowedOrigin,
+        time: new Date().toISOString()
+      });
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -43,7 +53,9 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400
+  maxAge: 86400,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 // Apply middleware

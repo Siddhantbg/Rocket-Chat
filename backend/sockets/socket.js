@@ -11,7 +11,17 @@ const typingUsers = new Map(); // roomId -> Set of typing user IDs
 function initializeSocket(server) {
   const io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:5173",
+      origin: (origin, callback) => {
+        const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
+        console.log('Socket.IO CORS check:', {
+          requestOrigin: origin,
+          allowedOrigin,
+          time: new Date().toISOString()
+        });
+        
+        // Be more permissive with Socket.IO connections
+        callback(null, true);
+      },
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -39,11 +49,18 @@ function initializeSocket(server) {
         id: socket.id,
         userId,
         hasToken: !!token,
-        time: new Date().toISOString()
+        time: new Date().toISOString(),
+        transport: socket.conn?.transport?.name,
+        handshakeHeaders: socket.handshake.headers,
+        remoteAddress: socket.handshake.address
       });
 
       if (!token || !userId) {
-        console.error('Missing auth data:', { hasToken: !!token, hasUserId: !!userId });
+        console.error('Missing auth data:', { 
+          hasToken: !!token, 
+          hasUserId: !!userId,
+          headers: socket.handshake.headers 
+        });
         return next(new Error('Authentication failed - missing token or userId'));
       }
 

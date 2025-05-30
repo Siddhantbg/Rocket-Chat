@@ -23,7 +23,7 @@ app.set('io', io);
 const corsOptions = {
   origin: [
     'http://localhost:5173',                       // local frontend
-    'https://your-frontend-name.vercel.app'        // deployed frontend
+    'https://rocket-chat-sable.vercel.app'        // deployed frontend
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

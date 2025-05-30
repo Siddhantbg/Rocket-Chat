@@ -1,91 +1,180 @@
-# SynapseChat
+# 🚀 Rocket Chat
 
-A modern real-time chat application built with React and Node.js.
+A production-grade, full-stack real-time chat application built with **React**, **TypeScript**, **Express**, **MongoDB**, and enhanced using **Docker**, **Socket.IO**, **Zustand**, **Upstash Redis**, and other modern technologies.
 
-## Prerequisites
+### 🔗 Live Demo: [rocket-chat-sable.vercel.app](https://rocket-chat-sable.vercel.app)  
+### 🔗 Backend API: [rocket-chat-624j.onrender.com/api](https://rocket-chat-624j.onrender.com/api)
 
-- Node.js (v14 or higher)
-- MongoDB (v4.4 or higher)
-- npm or yarn
+---
 
-## Project Structure
-
-```
-synapse-chat/
-├── backend/         # Express server
-├── frontend/        # React application
-└── README.md
-```
-
-## Getting Started
-
-### Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file in the backend directory with the following content:
-   ```
-   PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/synapse_chat
-   JWT_SECRET=your_jwt_secret_key_here
-   JWT_REFRESH_SECRET=your_jwt_refresh_secret_key_here
-   ```
-
-4. Start the server:
-   ```bash
-   npm start
-   ```
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-## Features
-
-- User authentication (login/register)
-- JWT-based authentication with refresh tokens
-- Protected routes
-- Modern UI with Tailwind CSS
-- Real-time chat (coming soon)
-
-## Tech Stack
+## 🛠 Tech Stack
 
 ### Frontend
-- React (Vite)
+- React
 - TypeScript
+- Vite (blazing-fast build tool)
 - Tailwind CSS
-- React Router DOM
-- Zustand (State Management)
+- Zustand (lightweight state management)
+- Socket.IO Client
 - Axios
 
 ### Backend
 - Node.js
-- Express
-- MongoDB with Mongoose
-- JWT Authentication
-- bcrypt for password hashing
+- Express.js (REST API)
+- Socket.IO (real-time communication)
+- MongoDB (NoSQL database)
+- Mongoose (ODM for MongoDB)
+- Upstash Redis (caching & rate-limiting)
+- Docker (containerized deployment)
+- Cloudinary (media hosting)
 
-## License
+### Infrastructure & Deployment
+- Vercel (frontend)
+- Render (backend/API)
+- Docker Compose (multi-service orchestration)
 
-MIT 
+---
+
+## 🚦 Key Libraries
+- **Zustand** — global, fast, simple state management
+- **Socket.IO** — reliable, scalable real-time messaging
+- **Multer** + **Cloudinary Storage** — file uploads
+- **bcryptjs** & **JWT** — authentication & authorization
+- **Upstash Redis** — rate limiting and caching
+- **Nodemon** — hot reloading backend during dev
+
+---
+
+## ⚡ Features
+
+### 💬 Real-Time Chat
+- Instant messaging
+- Online presence
+- Read & delivered receipts (✓✓)
+- "Seen at" indicators (Instagram-style)
+- Typing indicators
+- Public and private rooms
+- Media sharing (images, videos, docs)
+
+### 🔒 Secure Authentication
+- JWT-based auth
+- Secure session handling
+- Password hashing with bcrypt
+
+### 📈 API Optimization
+- Redis-powered rate limiting
+- Server-side caching for fast access
+
+### 🐳 Scalable & Modern DevOps
+- Fully Dockerized
+- CI/CD ready
+- Environment-variable driven config
+
+### 🖼 File Uploads
+- Image/video/document sharing
+- Media hosted on Cloudinary
+
+### 🧑‍💻 Developer Experience
+- TypeScript across the stack
+- Modular, scalable codebase
+- REST & WebSocket APIs
+- Docker Compose for local dev
+
+---
+
+## 🌐 Deployment Overview
+
+| Layer            | Platform | Technology                 | Notes                    |
+|------------------|----------|-----------------------------|--------------------------|
+| Frontend         | Vercel   | React, Vite, TypeScript     | [Live Demo](https://rocket-chat-sable.vercel.app) |
+| Backend/API      | Render   | Node.js, Express, Socket.IO | [API](https://rocket-chat-624j.onrender.com/api) |
+| Database         | MongoDB  | Atlas or Render-hosted      |                         |
+| Media Storage    | Cloudinary | Cloudinary                 | For file/media uploads  |
+| Caching/RateLimit| Upstash  | Redis (Serverless)          |                         |
+| Containerization | Docker   | Docker, Docker Compose      | For local/prod setups   |
+
+---
+
+## 🏁 Getting Started
+
+### 🔧 Local Setup (with Docker)
+```bash
+# Clone the repo
+git clone https://github.com/yourusername/rocket-chat.git
+cd rocket-chat
+
+# Copy env example files and fill values
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+
+# Start all services
+docker-compose up --build
+---
+```
+## 🔧 Manual Setup (Non-Docker)
+
+```bash
+# Backend setup
+cd backend
+npm install
+npm run dev
+
+# Frontend setup
+cd frontend
+npm install
+npm run dev
+```
+---
+
+## 📚 API & Socket Documentation
+
+### 📦 REST Endpoints
+- `POST /api/auth` — Register/Login
+- `GET /api/messages` — Retrieve messages
+- `POST /api/messages` — Send message
+- `POST /api/rooms` — Create/Join/Leave room
+
+### 🔌 Socket.IO Events
+- `message:send`, `message:receive`
+- `user:connect`, `room:join`
+- `message:read`, `message:delivered`
+- `typing:start`, `typing:stop`
+- ...and more
+
+---
+
+## 🔐 Environment Variables
+
+### 🌐 Frontend
+- `VITE_SOCKET_URL`
+- `VITE_API_URL`
+
+### 🛠 Backend
+- `FRONTEND_URL`
+- `MONGODB_URI`
+- `JWT_SECRET`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+- `CLOUDINARY_URL`
+
+---
+
+## 💡 Highlights
+
+- ⚡ **Real-time communication** using Socket.IO
+- 🔐 **Secure JWT authentication**
+- 🚦 **Rate limiting & caching** via Upstash Redis
+- 🐳 **Dockerized**, production-ready architecture
+- 🌎 **Cloud-native deployment** with Vercel & Render
+
+---
+
+## 👨‍💻 Maintainer
+
+**Siddhant Bhagat**  
+[LinkedIn →](https://www.linkedin.com/feed/)
+
+---
+
+⭐️ _Star this repo if you found it useful!_  
+_Built with passion for speed, scalability, and developer happiness._

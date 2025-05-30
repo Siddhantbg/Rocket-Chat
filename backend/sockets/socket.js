@@ -15,9 +15,13 @@ function initializeSocket(server) {
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"]
     },
-    // Additional Socket.IO options for better handling of credentials
-    allowEIO3: true, // Allow Engine.IO version 3
-    transports: ['websocket', 'polling']
+    allowEIO3: true,
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    transports: ['websocket', 'polling'],
+    path: '/socket.io/',
+    connectTimeout: 45000,
+    maxHttpBufferSize: 1e8 // 100 MB
   });
 
   io.on('connection', (socket) => {

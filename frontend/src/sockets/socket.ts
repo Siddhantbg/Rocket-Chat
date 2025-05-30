@@ -62,6 +62,13 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
   {
     autoConnect: false,
     withCredentials: true,
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000,
+    path: '/socket.io/',
+    transports: ['websocket', 'polling'],
     auth: () => {
       const { user, accessToken } = useAuthStore.getState();
       return {

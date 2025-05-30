@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/11121b7d-36c5-400d-9e24-7977ab927f37)# 🚀 Rocket Chat
+# 🚀 Rocket Chat
 
 A scalable, real-time messaging platform designed for seamless team communication, optimized for performance, security, and intuitive user experience.
 A production-grade, full-stack real-time chat application built with **React**, **TypeScript**, **Express**, **MongoDB**, and enhanced using **Docker**, **Socket.IO**, **Zustand**, **Upstash Redis**, and other modern technologies.
@@ -31,7 +31,7 @@ A production-grade, full-stack real-time chat application built with **React**, 
 
 ## 📸 Screenshots & Demonstrations
 ![Login Screen](assets/ss.png)
-![Real-Time Chat](assets/link.gif)
+![Real-Time Chat](assets/link.png)
 
 ---
 ### Infrastructure & Deployment

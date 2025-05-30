@@ -1,5 +1,6 @@
 # 🚀 Rocket Chat
 
+A scalable, real-time messaging platform designed for seamless team communication, optimized for performance, security, and intuitive user experience.
 A production-grade, full-stack real-time chat application built with **React**, **TypeScript**, **Express**, **MongoDB**, and enhanced using **Docker**, **Socket.IO**, **Zustand**, **Upstash Redis**, and other modern technologies.
 
 ### 🔗 Live Demo: [rocket-chat-sable.vercel.app](https://rocket-chat-sable.vercel.app)  

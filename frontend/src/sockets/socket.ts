@@ -70,51 +70,87 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
     transports: ['websocket', 'polling'],
     path: '/socket.io/',
     forceNew: true,
-    auth: () => {
+    auth: (cb) => {
       const { user, accessToken } = useAuthStore.getState();
+      const authData = {
+        token: accessToken,
+        userId: user?.id,
+      };
+      
       console.log('Socket auth data:', { 
         hasUser: !!user, 
         hasToken: !!accessToken,
         socketUrl: import.meta.env.VITE_SOCKET_URL,
         timestamp: new Date().toISOString()
       });
-      return {
-        token: accessToken,
-        userId: user?.id,
-      };
+
+      if (!accessToken || !user?.id) {
+        console.error('Missing auth data:', { hasToken: !!accessToken, hasUser: !!user });
+        socketClient.disconnect();
+        return;
+      }
+
+      cb(authData);
     }
   }
 );
 
 // Set up socket event listeners
 socketClient.on('connect', () => {
+  const { user } = useAuthStore.getState();
   console.log('Socket connected successfully', {
     id: socketClient.id,
     connected: socketClient.connected,
-    url: socketClient.io.opts.hostname,
+    userId: user?.id,
+    url: import.meta.env.VITE_SOCKET_URL,
     timestamp: new Date().toISOString(),
     transport: socketClient.io.engine?.transport?.name
   });
+
+  // Emit user:connect event after successful connection
+  if (user?.id) {
+    socketClient.emit('user:connect', user.id);
+  } else {
+    console.error('No user ID available for user:connect event');
+    socketClient.disconnect();
+  }
 });
 
 socketClient.on('disconnect', (reason) => {
+  const { user } = useAuthStore.getState();
   console.log('Socket disconnected:', {
     reason,
     wasConnected: socketClient.connected,
+    userId: user?.id,
     attempts: (socketClient as any).io._reconnectionAttempts,
     timestamp: new Date().toISOString(),
     transport: socketClient.io.engine?.transport?.name
   });
+
+  // If the disconnection was due to an auth error, don't reconnect
+  if (reason === 'io server disconnect') {
+    console.error('Server disconnected the socket - will not attempt to reconnect');
+    socketClient.disconnect();
+  }
 });
 
 socketClient.on('connect_error', (error) => {
+  const { user, accessToken } = useAuthStore.getState();
   console.error('Socket connection error:', {
     message: error.message,
     description: error.toString(),
     transport: socketClient.io.engine?.transport?.name,
     timestamp: new Date().toISOString(),
-    url: import.meta.env.VITE_SOCKET_URL
+    url: import.meta.env.VITE_SOCKET_URL,
+    hasUser: !!user,
+    hasToken: !!accessToken
   });
+
+  // If we get a 401 error, disconnect and don't retry
+  if (error.message.includes('401')) {
+    console.error('Authentication failed - disconnecting socket');
+    socketClient.disconnect();
+  }
 });
 
 // Handle avatar updates

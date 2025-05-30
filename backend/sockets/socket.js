@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const Message = require('../models/Message');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 // Store user socket mappings and online status
 const userSockets = new Map();
@@ -29,13 +30,70 @@ function initializeSocket(server) {
     }
   });
 
-  // Add middleware to log connection attempts
+  // Add authentication middleware
+  io.use(async (socket, next) => {
+    try {
+      const { token, userId } = socket.handshake.auth;
+      
+      console.log('Socket auth attempt:', {
+        id: socket.id,
+        userId,
+        hasToken: !!token,
+        time: new Date().toISOString()
+      });
+
+      if (!token || !userId) {
+        console.error('Missing auth data:', { hasToken: !!token, hasUserId: !!userId });
+        return next(new Error('Authentication failed - missing token or userId'));
+      }
+
+      // Verify JWT token
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.id !== userId) {
+          throw new Error('User ID mismatch');
+        }
+        socket.user = decoded;
+      } catch (error) {
+        console.error('JWT verification failed:', error.message);
+        return next(new Error('Authentication failed - invalid token'));
+      }
+
+      // Check for existing socket connection for this user
+      const existingSocketId = userSockets.get(userId);
+      if (existingSocketId) {
+        const existingSocket = io.sockets.sockets.get(existingSocketId);
+        if (existingSocket) {
+          console.log(`Disconnecting existing socket for user ${userId}`);
+          existingSocket.disconnect(true);
+        }
+        userSockets.delete(userId);
+        onlineUsers.delete(userId);
+      }
+
+      console.log('Socket authenticated:', {
+        id: socket.id,
+        userId: socket.user.id,
+        time: new Date().toISOString()
+      });
+
+      next();
+    } catch (error) {
+      console.error('Socket auth error:', error);
+      next(new Error('Authentication failed'));
+    }
+  });
+
+  // Add connection logging middleware
   io.use((socket, next) => {
     console.log('Connection attempt:', {
       id: socket.id,
       handshake: {
         headers: socket.handshake.headers,
-        auth: socket.handshake.auth,
+        auth: {
+          hasToken: !!socket.handshake.auth.token,
+          hasUserId: !!socket.handshake.auth.userId
+        },
         query: socket.handshake.query,
         issued: new Date(socket.handshake.issued).toISOString(),
         url: socket.handshake.url,
@@ -48,13 +106,28 @@ function initializeSocket(server) {
   io.on('connection', (socket) => {
     console.log('New client connected:', {
       id: socket.id,
+      userId: socket.user?.id,
       transport: socket.conn.transport.name,
       time: new Date().toISOString()
     });
 
     // Handle user connection
     socket.on('user:connect', (userId) => {
-      console.log('User connected:', userId);
+      // Verify the userId matches the authenticated user
+      if (userId !== socket.user?.id) {
+        console.error('User ID mismatch in user:connect:', {
+          providedId: userId,
+          authenticatedId: socket.user?.id
+        });
+        socket.disconnect(true);
+        return;
+      }
+
+      console.log('User connected:', {
+        userId,
+        socketId: socket.id,
+        time: new Date().toISOString()
+      });
       
       // Store socket mapping
       userSockets.set(userId, socket.id);

@@ -31,7 +31,7 @@ A production-grade, full-stack real-time chat application built with **React**, 
 
 ## 📸 Screenshots & Demonstrations
 ![Login Screen](assets/ss.png)
-![Real-Time Chat](assets/link.gif)
+![Real-Time Chat](assets/link.png)
 
 ---
 ### Infrastructure & Deployment

@@ -61,9 +61,17 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
   import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000',
   {
     autoConnect: false,
-    withCredentials: true
+    withCredentials: true,
+    auth: () => {
+      const { user, accessToken } = useAuthStore.getState();
+      return {
+        token: accessToken,
+        userId: user?.id,
+      };
+    }
   }
 );
+
 
 // Set up socket event listeners
 socketClient.on('connect', () => {

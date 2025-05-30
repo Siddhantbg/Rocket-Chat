@@ -59,19 +59,19 @@ function initializeSocket(server) {
         
         // Log the token verification
         console.log('Token verification:', {
-          decodedId: decoded.id,
+          decodedId: decoded.userId,
           providedId: userId,
-          match: decoded.id === userId,
+          match: decoded.userId === userId,
           time: new Date().toISOString()
         });
 
-        if (decoded.id !== userId) {
+        if (decoded.userId !== userId) {
           throw new Error('User ID mismatch');
         }
 
         // Store user data in socket
         socket.user = {
-          id: decoded.id,
+          id: decoded.userId,
           // Add any other user data you need
         };
 

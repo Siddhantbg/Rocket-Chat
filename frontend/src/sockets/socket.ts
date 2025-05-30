@@ -77,23 +77,27 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
         hasUser: !!user, 
         hasToken: !!accessToken,
         socketUrl: import.meta.env.VITE_SOCKET_URL,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        userId: user?.id
       });
 
       if (!accessToken || !user?.id) {
         console.error('Missing auth data:', { 
           hasToken: !!accessToken, 
-          hasUser: !!user
+          hasUser: !!user,
+          userId: user?.id
         });
         socketClient.disconnect();
         return;
       }
 
-      // Send auth data
-      cb({
+      // Send auth data with exact values for debugging
+      const authData = {
         token: accessToken,
         userId: user.id
-      });
+      };
+      console.log('Sending auth data:', authData);
+      cb(authData);
     }
   }
 );

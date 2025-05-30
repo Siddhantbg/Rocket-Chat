@@ -1,5 +1,6 @@
-# 🚀 Rocket Chat
+![image](https://github.com/user-attachments/assets/11121b7d-36c5-400d-9e24-7977ab927f37)# 🚀 Rocket Chat
 
+A scalable, real-time messaging platform designed for seamless team communication, optimized for performance, security, and intuitive user experience.
 A production-grade, full-stack real-time chat application built with **React**, **TypeScript**, **Express**, **MongoDB**, and enhanced using **Docker**, **Socket.IO**, **Zustand**, **Upstash Redis**, and other modern technologies.
 
 ### 🔗 Live Demo: [rocket-chat-sable.vercel.app](https://rocket-chat-sable.vercel.app)  
@@ -8,26 +9,31 @@ A production-grade, full-stack real-time chat application built with **React**, 
 ---
 
 ## 🛠 Tech Stack
+- **Frontend:** React, TypeScript, Zustand, Tailwind CSS
+- **Backend:** Node.js, Express, MongoDB, Upstash Redis, JWT, Cloudinary
+- **Real-time Communication:** Socket.IO, WebSockets
+- **DevOps:** Docker, GitHub Actions (CI/CD ready)
+- **Deployment:** Docker containers, suitable for Kubernetes or Render deployments
 
-### Frontend
-- React
-- TypeScript
-- Vite (blazing-fast build tool)
-- Tailwind CSS
-- Zustand (lightweight state management)
-- Socket.IO Client
-- Axios
+---
 
-### Backend
-- Node.js
-- Express.js (REST API)
-- Socket.IO (real-time communication)
-- MongoDB (NoSQL database)
-- Mongoose (ODM for MongoDB)
-- Upstash Redis (caching & rate-limiting)
-- Docker (containerized deployment)
-- Cloudinary (media hosting)
+## 📐 System Architecture
+![Rocket Chat Architecture](assets/architecture.png)
 
+---
+
+## 🚧 Technical Challenges Faced & Solutions
+- **Handling WebSocket Scalability**: Implemented Redis Pub/Sub for distributed event broadcasting across multiple server instances.
+- **Real-Time Delivery Confirmations**: Designed a robust optimistic UI with client-side message state management and backend confirmations.
+- **Rate Limiting & Caching**: Optimized API performance using middleware with Redis-backed rate limiting and caching mechanisms.
+
+---
+
+## 📸 Screenshots & Demonstrations
+![Login Screen](assets/ss.png)
+![Real-Time Chat](assets/link.gif)
+
+---
 ### Infrastructure & Deployment
 - Vercel (frontend)
 - Render (backend/API)
@@ -169,6 +175,12 @@ npm run dev
 
 ---
 
+## 🚀 Future Roadmap
+- Integrate OAuth (Google, Microsoft) authentication
+- Advanced analytics and monitoring dashboards
+- Native mobile app (React Native)
+
+---
 ## 👨‍💻 Maintainer
 
 **Siddhant Bhagat**  

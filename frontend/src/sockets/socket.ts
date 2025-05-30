@@ -70,35 +70,30 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
     transports: ['polling', 'websocket'], // Try polling first, then upgrade to websocket
     path: '/socket.io/',
     forceNew: true,
-    extraHeaders: {
-      'Origin': window.location.origin
-    },
     auth: (cb) => {
       const { user, accessToken } = useAuthStore.getState();
-      const authData = {
-        token: accessToken,
-        userId: user?.id,
-      };
       
       console.log('Socket auth attempt:', { 
         hasUser: !!user, 
         hasToken: !!accessToken,
         socketUrl: import.meta.env.VITE_SOCKET_URL,
-        origin: window.location.origin,
         timestamp: new Date().toISOString()
       });
 
       if (!accessToken || !user?.id) {
         console.error('Missing auth data:', { 
           hasToken: !!accessToken, 
-          hasUser: !!user,
-          origin: window.location.origin 
+          hasUser: !!user
         });
         socketClient.disconnect();
         return;
       }
 
-      cb(authData);
+      // Send auth data
+      cb({
+        token: accessToken,
+        userId: user.id
+      });
     }
   }
 );
@@ -114,7 +109,6 @@ socketClient.on('connect', () => {
     connected: socketClient.connected,
     userId: user?.id,
     url: import.meta.env.VITE_SOCKET_URL,
-    origin: window.location.origin,
     timestamp: new Date().toISOString(),
     transport: socketClient.io.engine?.transport?.name,
     attempts: reconnectAttempts
@@ -140,8 +134,7 @@ socketClient.on('disconnect', (reason) => {
     userId: user?.id,
     attempts: reconnectAttempts,
     timestamp: new Date().toISOString(),
-    transport: socketClient.io.engine?.transport?.name,
-    origin: window.location.origin
+    transport: socketClient.io.engine?.transport?.name
   });
 
   // If we've tried reconnecting too many times quickly, slow down
@@ -153,8 +146,8 @@ socketClient.on('disconnect', (reason) => {
   reconnectAttempts++;
 
   // If the disconnection was due to an auth error, don't reconnect
-  if (reason === 'io server disconnect') {
-    console.error('Server disconnected the socket - will not attempt to reconnect');
+  if (reason === 'io server disconnect' || reason === 'io client disconnect') {
+    console.error('Socket disconnected by server or client - stopping reconnection');
     socketClient.disconnect();
   }
 });
@@ -167,14 +160,13 @@ socketClient.on('connect_error', (error) => {
     transport: socketClient.io.engine?.transport?.name,
     timestamp: new Date().toISOString(),
     url: import.meta.env.VITE_SOCKET_URL,
-    origin: window.location.origin,
     hasUser: !!user,
     hasToken: !!accessToken,
     attempts: reconnectAttempts
   });
 
-  // If we get a 401 error, disconnect and don't retry
-  if (error.message.includes('401')) {
+  // If we get an auth error, disconnect and don't retry
+  if (error.message.includes('Authentication failed')) {
     console.error('Authentication failed - disconnecting socket');
     socketClient.disconnect();
   }

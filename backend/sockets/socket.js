@@ -11,17 +11,7 @@ const typingUsers = new Map(); // roomId -> Set of typing user IDs
 function initializeSocket(server) {
   const io = new Server(server, {
     cors: {
-      origin: (origin, callback) => {
-        const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
-        console.log('Socket.IO CORS check:', {
-          requestOrigin: origin,
-          allowedOrigin,
-          time: new Date().toISOString()
-        });
-        
-        // Be more permissive with Socket.IO connections
-        callback(null, true);
-      },
+      origin: process.env.FRONTEND_URL || "http://localhost:5173",
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -30,7 +20,7 @@ function initializeSocket(server) {
     allowEIO3: true,
     pingTimeout: 60000,
     pingInterval: 25000,
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'],
     path: '/socket.io/',
     connectTimeout: 45000,
     maxHttpBufferSize: 1e8, // 100 MB
@@ -50,16 +40,15 @@ function initializeSocket(server) {
         userId,
         hasToken: !!token,
         time: new Date().toISOString(),
-        transport: socket.conn?.transport?.name,
-        handshakeHeaders: socket.handshake.headers,
-        remoteAddress: socket.handshake.address
+        headers: socket.handshake.headers,
+        transport: socket.conn?.transport?.name
       });
 
       if (!token || !userId) {
         console.error('Missing auth data:', { 
           hasToken: !!token, 
           hasUserId: !!userId,
-          headers: socket.handshake.headers 
+          socketId: socket.id
         });
         return next(new Error('Authentication failed - missing token or userId'));
       }
@@ -67,36 +56,58 @@ function initializeSocket(server) {
       // Verify JWT token
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        // Log the token verification
+        console.log('Token verification:', {
+          decodedId: decoded.id,
+          providedId: userId,
+          match: decoded.id === userId,
+          time: new Date().toISOString()
+        });
+
         if (decoded.id !== userId) {
           throw new Error('User ID mismatch');
         }
-        socket.user = decoded;
+
+        // Store user data in socket
+        socket.user = {
+          id: decoded.id,
+          // Add any other user data you need
+        };
+
+        // Check for existing socket connection
+        const existingSocketId = userSockets.get(userId);
+        if (existingSocketId) {
+          const existingSocket = io.sockets.sockets.get(existingSocketId);
+          if (existingSocket) {
+            console.log(`Disconnecting existing socket for user ${userId}`);
+            existingSocket.disconnect(true);
+          }
+          userSockets.delete(userId);
+          onlineUsers.delete(userId);
+        }
+
+        console.log('Socket authenticated:', {
+          id: socket.id,
+          userId: socket.user.id,
+          time: new Date().toISOString()
+        });
+
+        next();
       } catch (error) {
-        console.error('JWT verification failed:', error.message);
+        console.error('JWT verification failed:', {
+          error: error.message,
+          socketId: socket.id,
+          time: new Date().toISOString()
+        });
         return next(new Error('Authentication failed - invalid token'));
       }
-
-      // Check for existing socket connection for this user
-      const existingSocketId = userSockets.get(userId);
-      if (existingSocketId) {
-        const existingSocket = io.sockets.sockets.get(existingSocketId);
-        if (existingSocket) {
-          console.log(`Disconnecting existing socket for user ${userId}`);
-          existingSocket.disconnect(true);
-        }
-        userSockets.delete(userId);
-        onlineUsers.delete(userId);
-      }
-
-      console.log('Socket authenticated:', {
-        id: socket.id,
-        userId: socket.user.id,
+    } catch (error) {
+      console.error('Socket auth error:', {
+        error: error.message,
+        socketId: socket.id,
         time: new Date().toISOString()
       });
-
-      next();
-    } catch (error) {
-      console.error('Socket auth error:', error);
       next(new Error('Authentication failed'));
     }
   });

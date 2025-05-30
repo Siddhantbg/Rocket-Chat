@@ -58,19 +58,26 @@ interface ClientToServerEvents {
 
 // Create socket instance
 export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-  import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000',
+  import.meta.env.VITE_SOCKET_URL,
   {
     autoConnect: false,
     withCredentials: true,
     reconnection: true,
-    reconnectionAttempts: 5,
+    reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
     timeout: 20000,
-    path: '/socket.io/',
     transports: ['websocket', 'polling'],
+    path: '/socket.io/',
+    forceNew: true,
     auth: () => {
       const { user, accessToken } = useAuthStore.getState();
+      console.log('Socket auth data:', { 
+        hasUser: !!user, 
+        hasToken: !!accessToken,
+        socketUrl: import.meta.env.VITE_SOCKET_URL,
+        timestamp: new Date().toISOString()
+      });
       return {
         token: accessToken,
         userId: user?.id,
@@ -79,18 +86,35 @@ export const socketClient: Socket<ServerToClientEvents, ClientToServerEvents> = 
   }
 );
 
-
 // Set up socket event listeners
 socketClient.on('connect', () => {
-  console.log('Connected to socket server');
+  console.log('Socket connected successfully', {
+    id: socketClient.id,
+    connected: socketClient.connected,
+    url: socketClient.io.opts.hostname,
+    timestamp: new Date().toISOString(),
+    transport: socketClient.io.engine?.transport?.name
+  });
 });
 
-socketClient.on('disconnect', () => {
-  console.log('Disconnected from socket server');
+socketClient.on('disconnect', (reason) => {
+  console.log('Socket disconnected:', {
+    reason,
+    wasConnected: socketClient.connected,
+    attempts: (socketClient as any).io._reconnectionAttempts,
+    timestamp: new Date().toISOString(),
+    transport: socketClient.io.engine?.transport?.name
+  });
 });
 
 socketClient.on('connect_error', (error) => {
-  console.error('Socket connection error:', error);
+  console.error('Socket connection error:', {
+    message: error.message,
+    description: error.toString(),
+    transport: socketClient.io.engine?.transport?.name,
+    timestamp: new Date().toISOString(),
+    url: import.meta.env.VITE_SOCKET_URL
+  });
 });
 
 // Handle avatar updates

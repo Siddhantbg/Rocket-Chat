@@ -13,7 +13,8 @@ function initializeSocket(server) {
       origin: process.env.FRONTEND_URL || "http://localhost:5173",
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
-      allowedHeaders: ["Content-Type", "Authorization"]
+      allowedHeaders: ["Content-Type", "Authorization"],
+      maxAge: 86400
     },
     allowEIO3: true,
     pingTimeout: 60000,
@@ -21,11 +22,35 @@ function initializeSocket(server) {
     transports: ['websocket', 'polling'],
     path: '/socket.io/',
     connectTimeout: 45000,
-    maxHttpBufferSize: 1e8 // 100 MB
+    maxHttpBufferSize: 1e8, // 100 MB
+    allowUpgrades: true,
+    perMessageDeflate: {
+      threshold: 1024 // Only compress messages larger than 1KB
+    }
+  });
+
+  // Add middleware to log connection attempts
+  io.use((socket, next) => {
+    console.log('Connection attempt:', {
+      id: socket.id,
+      handshake: {
+        headers: socket.handshake.headers,
+        auth: socket.handshake.auth,
+        query: socket.handshake.query,
+        issued: new Date(socket.handshake.issued).toISOString(),
+        url: socket.handshake.url,
+        time: new Date().toISOString()
+      }
+    });
+    next();
   });
 
   io.on('connection', (socket) => {
-    console.log('New client connected');
+    console.log('New client connected:', {
+      id: socket.id,
+      transport: socket.conn.transport.name,
+      time: new Date().toISOString()
+    });
 
     // Handle user connection
     socket.on('user:connect', (userId) => {

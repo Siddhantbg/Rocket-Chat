@@ -4,11 +4,17 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const { createServer } = require('http');
 const initializeSocket = require('./sockets/socket');
+const checkEnvVariables = require('./scripts/checkEnv');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+
+// Check environment variables before starting
+if (!checkEnvVariables()) {
+  process.exit(1);
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -19,13 +25,25 @@ const io = initializeSocket(httpServer);
 // Store io instance in app for use in routes
 app.set('io', io);
 
-// CORS configuration
+// CORS configuration with detailed logging
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+    console.log('CORS request from origin:', origin);
+    console.log('Allowed origin:', allowedOrigin);
+    
+    if (!origin || origin === allowedOrigin) {
+      callback(null, true);
+    } else {
+      console.error('CORS blocked for origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range']
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400
 };
 
 // Apply middleware

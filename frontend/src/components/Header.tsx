@@ -17,7 +17,7 @@ const Header = () => {
           {/* Left side - Brand */}
           <div className="flex items-center">
             <Link to="/dashboard" className="text-white text-xl font-bold">
-              SynapseChat
+              Rocket Chat
             </Link>
           </div>
 
